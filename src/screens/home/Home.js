@@ -11,8 +11,7 @@ import { withStyles } from "@material-ui/core/styles";
 const id = "123456";
 
 const styles = {
-    resCardWidth:{width:"90%"}
-    
+    resCardWidth:{width:"90%"}    
 };
 
 class Home extends Component{ 
@@ -96,7 +95,7 @@ class Home extends Component{
                         )
                     }
                 </Grid>                 
-                 <div>
+                <div>
                     <h1>Users</h1>
                     <strong>select a user</strong>
                     <ul>

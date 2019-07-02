@@ -9,7 +9,6 @@ import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 
 
-
 const RestaurantCard = function(props){
     // const image = props.image;
     const index = props.index;
@@ -39,8 +38,10 @@ const RestaurantCard = function(props){
                             <span> {props.resCustRating} ({props.resNumberCustRated})</span>
                         </div>
                         <div className="avg-price">
-                            <span><i className="fa fa-rupee-sign"></i></span>
-                            <span> {props.avgPrice} for two</span>
+                            {/* <span><i className="fa fa-rupee-sign"></i></span>
+                            <span> {props.avgPrice} for two</span> */}
+
+                            <span><i className="fa fa-rupee-sign"></i> {props.avgPrice} for two</span>                            
                         </div>
                     </div>
                 </Typography>
