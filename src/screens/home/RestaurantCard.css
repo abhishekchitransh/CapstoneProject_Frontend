@@ -1,0 +1,14 @@
+.rating-bg-color{
+    background-color: #FFCC00;    
+    color: white;
+    padding: 4px 4px 4px 5px;
+}
+
+.rating-main-contnr{
+    display: flex;
+    justify-content:space-between;
+}
+
+.avg-price{
+    padding: 4px 4px 4px 5px;
+}

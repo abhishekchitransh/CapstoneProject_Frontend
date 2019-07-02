@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
+
 import Controller from './screens/Controller'
-import TestCard from './screens/checkout/TestCard'
+
 
 import * as serviceWorker from './serviceWorker';
 

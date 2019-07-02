@@ -221,7 +221,7 @@ render(){
             <SearchIcon />
           </div>          
           <Input
-            //onChange={this.props.searchImageByDescription.bind(this)}
+            onChange={this.props.searchRestaurantsByName.bind(this)}
             className={classes.searchInput}
             placeholder="Search by restaurant name"            
           />
