@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import Home from "../screens/home/Home";
 import Checkout from "../screens/checkout/Checkout"
+import Details from "../screens/details/Details"
 
 /**
  * Class component for controller
@@ -9,6 +10,7 @@ import Checkout from "../screens/checkout/Checkout"
  * @extends {Component}
  */
 class Controller extends Component {
+  //will be replaced with actual url
   baseUrl = "http://localhost:8080/api/";
 
   render() {
@@ -19,7 +21,12 @@ class Controller extends Component {
             exact
             path="/"
             render={props => <Home {...props} baseUrl={this.baseUrl} />}
-          />          
+          />
+          <Route
+            exact
+            path="/restaurant/:id"
+            render={props => <Details {...props} baseUrl={this.baseUrl} />}
+          />                    
           <Route
             exact
             path="/checkout"

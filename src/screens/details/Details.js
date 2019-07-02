@@ -23,6 +23,9 @@ import Card from "@material-ui/core/Card";
 import Badge from "@material-ui/core/Badge";
 import ShoppingCart from "@material-ui/icons/ShoppingCart";
 import { Button } from "@material-ui/core";
+import { Link } from 'react-router-dom';
+
+const AdapterLink = React.forwardRef((props, ref) => <Link innerRef={ref} {...props} />)
 
 const styles = theme => ({
   root: {
@@ -190,7 +193,8 @@ class Details extends Component {
                             size="large"
                             fullWidth="true"
                             aria-label="Large contained secondary button group"
-                            onClick={this.checkoutHandler}>CHECKOUT
+                            onClick={this.checkoutHandler}
+                            component={AdapterLink} to="/checkout">CHECKOUT
                         </Button>
                       </Grid>
                   </CardContent>
