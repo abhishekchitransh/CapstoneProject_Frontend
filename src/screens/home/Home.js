@@ -7,9 +7,7 @@ import * as Constants from "../../common/Constants";
 import RestaurantCard from './RestaurantCard';
 import Grid from '@material-ui/core/Grid';
 import { withStyles } from "@material-ui/core/styles";
-import { Redirect } from 'react-router-dom'
 
-const id = "123456";
 
 const styles = {
     resCard:{width:"90%",cursor: "pointer"}    

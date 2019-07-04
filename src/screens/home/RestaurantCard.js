@@ -5,13 +5,11 @@ import CardActionArea from '@material-ui/core/CardActionArea';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
-import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import ButtonBase from '@material-ui/core/ButtonBase';
 import { withRouter } from 'react-router-dom';
 
 
-const RestaurantCard = function(props){console.log(props);
+const RestaurantCard = function(props){
     // const image = props.image;
     const index = props.index;
 	const classes = props.classes;	    	
@@ -40,9 +38,6 @@ const RestaurantCard = function(props){console.log(props);
 									<span> {props.resCustRating} ({props.resNumberCustRated})</span>
 								</div>
 								<div className="avg-price">
-									{/* <span><i className="fa fa-rupee-sign"></i></span>
-									<span> {props.avgPrice} for two</span> */}
-
 									<span><i className="fa fa-rupee-sign"></i> {props.avgPrice} for two</span>                            
 								</div>
 							</div>
