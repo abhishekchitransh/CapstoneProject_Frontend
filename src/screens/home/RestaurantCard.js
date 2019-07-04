@@ -8,48 +8,50 @@ import CardMedia from '@material-ui/core/CardMedia';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import ButtonBase from '@material-ui/core/ButtonBase';
+import { withRouter } from 'react-router-dom';
 
 
-const RestaurantCard = function(props){
+const RestaurantCard = function(props){console.log(props);
     // const image = props.image;
     const index = props.index;
-    const classes = props.classes;    
-		
-    return (
-        <Card className={classes.resCardWidth} key={index}>			
-				<CardMedia
-					component="img"
-					alt="Contemplative Reptile"
-					height="160"
-					image={props.resURL}
-					title="Contemplative Reptile"
-				/>
-				<CardContent>
-					<Typography gutterBottom variant="h5" component="h2">
-						{props.resName}
-					</Typography>
-					<Typography variant="body2" color="textSecondary">
-						{props.resFoodCategories}
-					</Typography>
-					<br />
-					<Typography variant="body2" component="div">
-						<div className="rating-main-contnr">
-							<div className="rating-bg-color">
-								<span><i className="fa fa-star"></i></span>
-								<span> {props.resCustRating} ({props.resNumberCustRated})</span>
-							</div>
-							<div className="avg-price">
-								{/* <span><i className="fa fa-rupee-sign"></i></span>
-								<span> {props.avgPrice} for two</span> */}
+	const classes = props.classes;	    	
 
-								<span><i className="fa fa-rupee-sign"></i> {props.avgPrice} for two</span>                            
+    return (
+		<div onClick={() => {let detailsPageUrl = '/restaurant/'+ props.resId; return props.history.push(detailsPageUrl)}} key={index}>
+			<Card className={classes.resCard} key={index}>			
+					<CardMedia
+						component="img"
+						alt={props.resName}
+						height="160"
+						image={props.resURL}
+					/>
+					<CardContent>
+						<Typography gutterBottom variant="h5" component="h2">
+							{props.resName}
+						</Typography>
+						<Typography variant="body2" color="textSecondary">
+							{props.resFoodCategories}
+						</Typography>
+						<br />
+						<Typography variant="body2" component="div">
+							<div className="rating-main-contnr">
+								<div className="rating-bg-color">
+									<span><i className="fa fa-star"></i></span>
+									<span> {props.resCustRating} ({props.resNumberCustRated})</span>
+								</div>
+								<div className="avg-price">
+									{/* <span><i className="fa fa-rupee-sign"></i></span>
+									<span> {props.avgPrice} for two</span> */}
+
+									<span><i className="fa fa-rupee-sign"></i> {props.avgPrice} for two</span>                            
+								</div>
 							</div>
-						</div>
-					</Typography>
-				</CardContent>						
-        </Card>
+						</Typography>
+					</CardContent>						
+			</Card>
+		</div>
     )
 
 }
 
-export default RestaurantCard;
+export default withRouter(RestaurantCard);

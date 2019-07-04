@@ -7,11 +7,12 @@ import * as Constants from "../../common/Constants";
 import RestaurantCard from './RestaurantCard';
 import Grid from '@material-ui/core/Grid';
 import { withStyles } from "@material-ui/core/styles";
+import { Redirect } from 'react-router-dom'
 
 const id = "123456";
 
 const styles = {
-    resCardWidth:{width:"90%"}    
+    resCard:{width:"90%",cursor: "pointer"}    
 };
 
 class Home extends Component{ 
@@ -71,19 +72,19 @@ class Home extends Component{
         } else {
             this.getAllImageData();
         }
-    };
+    };  
 
     render() {
-        const { classes } = this.props;		
-		console.log(this.state.imageData);
+        const { classes } = this.props;
         return(
-            <div>
+            <div>                
                 <Header baseUrl={this.props.baseUrl} searchRestaurantsByName = {this.searchRestaurantsByName} showSearch="true" />
 					<Grid container spacing={3} style={{padding:"1% 2%"}}>
                     {						
                         this.state.imageData.map((resItem,index) =>
                             <Grid item xs={12} sm={3} key={index}>
                                 <RestaurantCard
+                                    resId = {resItem.id}
                                     resURL = {resItem.photo_URL}
                                     resName = {resItem.restaurant_name}
                                     resFoodCategories = {resItem.categories}
