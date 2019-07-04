@@ -213,21 +213,7 @@ render(){
     logoToRender = (
       <Fastfood className={classes.icon}/>
     )
-    
-    let searchBoxToRender = null;    
-      searchBoxToRender = (
-        <div className="header-search-container">
-          <div className="search-icon">
-            <SearchIcon />
-          </div>          
-          <Input
-            onChange={this.props.searchRestaurantsByName.bind(this)}
-            className={classes.searchInput}
-            placeholder="Search by restaurant name"            
-          />
-        </div>
-      );
-    
+        
     let logoutBtnToRender = null;
     
     
@@ -235,7 +221,18 @@ render(){
         <div>
           <div className="header-main-container">
             <div className="header-logo-container">{logoToRender}</div>
-            {searchBoxToRender}
+            {this.props.showSearch &&
+              <div className="header-search-container">
+                <div className="search-icon">
+                <SearchIcon />
+              </div>          
+              <Input
+                onChange={this.props.searchRestaurantsByName.bind(this)}
+                className={classes.searchInput}
+                placeholder="Search by restaurant name"            
+              />
+            </div>
+            }                        
             {!this.state.loggedIn ?
               <div className="login-button">
                   <Button variant="contained" color="default" onClick={this.openModalHandler}>Login</Button>

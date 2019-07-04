@@ -93,7 +93,7 @@ export const makeApiCall = (
     buildUrlWithParameters(requestUrl, urlParametersObj)
   );
   if (!isUndefinedOrNull(requestHeadersObj)) {
-    for (let key in requestHeadersObj) {
+    for (let key in requestHeadersObj) {      
       if (!isUndefinedOrNullOrEmpty(requestHeadersObj[key])) {
         xhr.setRequestHeader(key, requestHeadersObj[key]);
       }

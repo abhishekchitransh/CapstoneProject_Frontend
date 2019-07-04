@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import Header from "../../common/header/Header";
 import Grid from "@material-ui/core/Grid";
 import PropTypes from 'prop-types';
+import * as Utils from '../../common/Utils';
+import * as Constants from '../../common/Constants';
 
 import { withStyles } from "@material-ui/core/styles";
 import { border } from '@material-ui/system';
@@ -20,7 +22,11 @@ import Tab from '@material-ui/core/Tab';
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 
-import { FormControl, InputLabel, Input, Select, CardContent, Card, AppBar } from "@material-ui/core";
+import { FormControl, InputLabel, Input, Select, AppBar } from "@material-ui/core";
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormLabel from '@material-ui/core/FormLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 
 import SummaryCard from './SummaryCard';
@@ -30,7 +36,7 @@ import { getCountry } from '../../common/dataServices';
 
 const styles = muiBaseTheme => ({
   root: {
-    width: "90%"
+    width: "100%"
   },
   button: {
     marginTop: muiBaseTheme.spacing(),
@@ -59,8 +65,24 @@ const styles = muiBaseTheme => ({
   saveAddressButton:{
       display:"block",
       marginTop:30
+  },
+  summaryCard:{
+    marginLeft:"-10px;"
+  },
+  divider:{
+    marginTop:"10px",
+    marginBottom:"10px",
+    marginLeft:"auto"
   } 
 });
+
+const access_token = "eyJraWQiOiI5ZmIzNDkyOC1hYTkzLTQ1ZjAtOTVhNi0wYzg5YjNkZmQ1MmQiLCJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJhdWQiOiIzNzU2ZDRjYy0wODZmLTQxZWEtYWE5Mi02OTBjZDFkNWFmNzIiLCJpc3MiOiJodHRwczovL0Zvb2RPcmRlcmluZ0FwcC5pbyIsImV4cCI6MTU2MTkyNSwiaWF0IjoxNTYxODk2fQ.28egiqghFsWqlcyH8QWbU9-JsP-fioXXwslVfelHoCmJyo95mFVb9PHgmdRVTrTqizPOIYwk3hscvdrXM-gikw";
+const req_header = {
+  "Accept": "application/json;charset=UTF-8",
+  "authorization": "Bearer " +  access_token,
+  "Access-Control-Allow-Origin" : "*",
+  "Content-Type": "application/json" 
+}
 
 const cust_address = [ { "id": "7b3fe6a4-6add-428f-8ba4-7428497270eb", "flat_building_name": "a-509", "locality": "BKC", "city": "bandra", "pincode": "400020", "state": { "id": "c860e78a-a29b-11e8-9a3a-720006ceb890", "state_name": "Maharashtra" } }, { "id": "cf38c624-4145-4a17-a15b-c4dc49fdeb73", "flat_building_name": "c-509", "locality": "Gopal Nager", "city": "worli", "pincode": "400018", "state": { "id": "c860e78a-a29b-11e8-9a3a-720006ceb890", "state_name": "Maharashtra" } } ]
 
@@ -81,7 +103,6 @@ function getSteps() {
 }
 
 const baseURL = "http://localhost:8080/api/";
-const access_token = 'eyJraWQiOiJlZTNmODY1Zi0wNGE0LTQ0YWUtODkzMS1lOWQ2ZDUxMTNkZmMiLCJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJhdWQiOiIyZjdmMGI4Zi05M2JjLTRlMTItOGMwYS1hNmM3NTFkMTc2YmUiLCJpc3MiOiJodHRwczovL0Zvb2RPcmRlcmluZ0FwcC5pbyIsImV4cCI6MTU2MTI0OCwiaWF0IjoxNTYxMjE5fQ.r8qYg2BoR9qSrSrcnr8SDz_zxEbhaM94Lj-H2aprGLZf9K0DK0x3Uq4du1thoB9Ed72aB7g57XmK8MXismL94A';
 
 class Checkout extends Component {    
     constructor(){
@@ -90,13 +111,15 @@ class Checkout extends Component {
             value:0, 
             activeStep : 0,
             data:getCountry(), 
-            dataAddress:"",           
-            selected:'IN'
+            dataAddress:[],           
+            selected:'IN',
+            dataPayments:[],
+            paymentMethod:[],
+            dataStates:[]
         };
     }
     renderOptions() {
-        return this.state.data.map((dt, i) => {
-         //console.log(dt);
+        return this.state.data.map((dt, i) => {         
           return (
               <MenuItem
                 label="Select a country"
@@ -111,13 +134,10 @@ class Checkout extends Component {
       let xhrAddresses = new XMLHttpRequest();
       let that = this;
       xhrAddresses.addEventListener("readystatechange", function () {  
-          if (this.readyState === 4) {          
-              let addressResponse = JSON.parse(xhrAddresses.response);                        
-              if(addressResponse.code === 'ATH-001'){
-                that.setState({dataAddress:[{ name:"No addresses found", code: 'NAF-001'}]});
-              }else{
-                that.setState({dataAddress: addressResponse});                
-              }
+          if (this.readyState === 4) {                                      
+                let address = JSON.parse(xhrAddresses.response); 
+                that.setState({dataAddress: address["addresses"]});
+                
           }
       })
       xhrAddresses.open("GET", baseURL + "address/customer");
@@ -127,15 +147,56 @@ class Checkout extends Component {
       xhrAddresses.setRequestHeader("Access-Control-Allow-Origin", "*");  
       xhrAddresses.send(data);
     }
+    getStates(){
+      const url = baseURL + 'states'
+      const that = this;
+
+      Utils.makeApiCall(
+        url, 
+        null,
+        null,
+        Constants.ApiRequestTypeEnum.GET,
+        null,
+        responseText => {
+          that.setState({
+            dataStates : JSON.parse(responseText).states
+          })
+          }
+        )
+    }
+    getPaymentMethods(){
+      const url = baseURL + 'payment'
+      const that = this;
+    
+      Utils.makeApiCall(
+        url, 
+        null,
+        null,
+        Constants.ApiRequestTypeEnum.GET,
+        req_header,
+        responseText => {
+          that.setState({
+            dataPayments : JSON.parse(responseText).paymentMethods
+          })
+          }
+        )
+    }
     onStateChange = (event) => {
         this.setState({selected:event.target.value})
     };
 
-    componentWillMount(){
+    componentDidMount(){
       this.getAddresses(baseURL, access_token);
+      this.getPaymentMethods();
+      this.getStates();
     }
-    getStepContent= (step) => {
-        //console.log(this.state.data);        
+
+    handleChange = (event) => {
+      this.setState({paymentMethod:event.target.value})
+    }
+
+    getStepContent= (step) => { 
+      console.log(this.state.dataStates);       
         switch (step) {
           case 0:
             return (
@@ -157,8 +218,8 @@ class Checkout extends Component {
                           >
                             <Grid container spacing={10}>
                               {
-                                cust_address.map((val, idx) => ( 
-                                  <Grid item xs={4}>
+                                this.state.dataAddress.map((val, idx) => ( 
+                                  <Grid item xs={4} key={val.id}>
                                     <CustomerAddress address={val} key={val.id + "_" + idx} />                                 
                                   </Grid>                                       
                               ))            
@@ -192,20 +253,20 @@ class Checkout extends Component {
                                     />
                                 </FormControl><br/><br/>                                
                                 <FormControl required className={this.props.formControl}>
-                                    <InputLabel htmlFor="State">State</InputLabel>
+                                    <InputLabel htmlFor="State" shrink>State</InputLabel>
                                     <Select 
                                         value={this.state.selected}
                                         onChange={this.onStateChange}                                        
                                         input={<Input name="state" id="state" />} 
-                                        style={{width:'120px'}} 
+                                        style={{width:'200px'}} 
                                         placeholder="Select State"                                      
                                         >
                                             <MenuItem selected value="0">
                                                 Select State
                                             </MenuItem>                                   
-                                            {this.state.data.map((state,i) => (                                                
-                                            <MenuItem key={"state_" + state.code + "_" + i} value={state.name}>
-                                                {state.name}
+                                            {this.state.dataStates.map((state,i) => (                                                
+                                            <MenuItem key={"state_" + state.id + "_" + i} value={state.state_name}>
+                                                {state.state_name}
                                             </MenuItem>
                                             ))}
                                         </Select>
@@ -216,14 +277,34 @@ class Checkout extends Component {
                                         id="Pincode"
                                         type="text"
                                     />
-                                </FormControl><br/><br/>                                                        
+                                </FormControl><br/><br/>
+                                <Button variant="contained" color="primary" onClick={this.addressClickHandler} className={this.props.formControl}>
+                                  SAVE ADDRESS
+                                </Button>                                                        
                             </div>
                         </TabContainer>
                     }
                 </div>
               );
           case 1:
-            return "An ad group contains one or more ads which target a shared set of keywords.";    
+            return (
+              <div>
+               <FormControl component="fieldset" className={this.props.formControl}>
+               <FormLabel component="legend">Select Mode of Payment</FormLabel>
+               <RadioGroup
+                  aria-label="Payment Method"
+                  name="payment"
+                  className={this.props.group}
+                  value={this.state.paymentMethod}
+                  onChange={this.handleChange}
+                >
+              {this.state.dataPayments.map((val, index) => (                
+                <FormControlLabel value={val.payment_name} control={<Radio />} label={val.payment_name} key={index}/>                
+              ))}
+              </RadioGroup>
+              </FormControl>
+              </div>
+            )
           default:
             return "Unknown step";
         }
@@ -251,14 +332,17 @@ class Checkout extends Component {
     this.setState({value})
   };
 
+  searchRestaurantsByName = event => {        
+    const searchValue = event.target.value;    
+  };
+
   render() {
     const { classes } = this.props;
     const steps = getSteps();
-    const { activeStep } = this.state;
-    
+    const { activeStep } = this.state;        
     return (
       <div>
-        <Header />
+        <Header showSearch = {false} searchRestaurantsByName = {this.searchRestaurantsByName}/>
         <Grid container spacing={3}>
           <Grid item xs={12} md={8}>
             <div className={classes.root}>
@@ -291,7 +375,7 @@ class Checkout extends Component {
             </div>
           </Grid>
           <Grid item xs={12} md={4}>
-            <SummaryCard 
+            <SummaryCard className={classes.summaryCard}
             key="test"
             index="1"
             classes={classes}    
