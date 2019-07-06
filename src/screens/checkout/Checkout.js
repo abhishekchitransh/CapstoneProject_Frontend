@@ -193,6 +193,7 @@ class Checkout extends Component {
 
     handleChange = (event) => {
       this.setState({paymentMethod:event.target.value})
+      sessionStorage.setItem("paymentMethod", event.target.value);
     }
 
     getStepContent= (step) => { 

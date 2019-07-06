@@ -5,7 +5,7 @@ import { withStyles } from "@material-ui/core/styles";
 import "./Details.css";
 import List from "@material-ui/core/List";
 import Typography from "@material-ui/core/Typography";
-import restaurantData from "./restaurantData";
+//import restaurantData from "./restaurantData";
 import ItemList from "./ItemList.js";
 import Cart from "./Cart.js";
 import Grade from '@material-ui/icons/Grade'
@@ -80,21 +80,27 @@ class Details extends Component {
 
   }
 
-  addItem = (item, id) => {
-
+  addItem = (item, id) => {    
     this.state.data.push({
       id: id,
       name: item.item_name,
       type: item.item_type,
-      price: item.price
-    });
+      price: item.price,
+      qty : 1 
+    });    
     this.state.total += item.price;
     this.setState(this.state);
   };
-  handleTotalHandler = price => {
+  handleTotalHandler = (price, item, qty) => {
     this.setState({
       total: this.state.total + price
     });
+    for(var x of this.state.data){            
+      if(x["name"] === item){        
+        x["qty"] = x["qty"] + qty;
+      }
+    }
+    
   };
 
   checkoutHandler = () =>{
@@ -106,7 +112,7 @@ class Details extends Component {
   render() {
     let that = this;
     const { classes } = this.props;
-    let  { categories } = restaurantData;
+   // let  { categories } = restaurantData;
 
     let items = this.state.data.map(function(item, index) {
       return (

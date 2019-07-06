@@ -37,7 +37,7 @@ const SummaryCard = function(props){
                                 {item.name}                            
                             </Grid>
                             <Grid item xs={3}>
-                                {item.type}                            
+                                {item.qty}                            
                             </Grid>
                             <Grid item xs={3}>
                                 {item.price}                            

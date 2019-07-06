@@ -35,7 +35,8 @@ class Cart extends Component {
         this.setState({
           qty: this.state.qty + 1
     });
-        this.props.handleTotal(this.props.price);
+      console.log(this.props);
+      this.props.handleTotal(this.props.price, this.props.name, this.state.qty);
       }
     }
     
@@ -44,7 +45,7 @@ class Cart extends Component {
         this.setState({
           qty: this.state.qty - 1
         });
-        this.props.handleTotal(-this.props.price);
+        this.props.handleTotal(-this.props.price, this.props.name, this.state.qty);
       }
     } 
 
