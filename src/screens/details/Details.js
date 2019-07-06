@@ -8,14 +8,7 @@ import Typography from "@material-ui/core/Typography";
 import restaurantData from "./restaurantData";
 import ItemList from "./ItemList.js";
 import Cart from "./Cart.js";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemAvatar from "@material-ui/core/ListItemAvatar";
-import Add from "@material-ui/icons/Add";
-import Remove from "@material-ui/icons/Remove";
 import Grade from '@material-ui/icons/Grade'
-import FiberManualRecord from "@material-ui/icons/FiberManualRecord";
-import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
-import ListItemText from "@material-ui/core/ListItemText";
 import IconButton from "@material-ui/core/IconButton";
 import CardHeader from "@material-ui/core/CardHeader";
 import CardContent from "@material-ui/core/CardContent";
@@ -26,7 +19,9 @@ import { Button } from "@material-ui/core";
 import { Link } from 'react-router-dom';
 
 const AdapterLink = React.forwardRef((props, ref) => <Link innerRef={ref} {...props} />)
+let access_token=sessionStorage.getItem('access-token');
 
+const baseURL = "http://localhost:8080/api/";
 const styles = theme => ({
   root: {
     flexGrow: 1
@@ -43,22 +38,49 @@ class Details extends Component {
     this.state = {
       data: [],
       total: 0,
-      categories:[]
+      categories:[],
+      restaurantData:[],
+      categoriesList:[],
+      address:[]
     };
    
   }
 
-  componentDidMount(){
+  componentWillMount(){
+   
     let newState = this.state;
-    let { categories } = restaurantData;
+    let data = null   
+    let xhrAddresses = new XMLHttpRequest();
+    let that = this;
+    xhrAddresses.addEventListener("readystatechange", function () {  
+        if (this.readyState === 4) {                                      
+              newState.restaurantData = JSON.parse(xhrAddresses.response); 
+           
+           
+            let { categories } = newState.restaurantData;
+            let {address} = newState.restaurantData;
+            newState.categoriesList=categories;
+            newState.address=address;
     categories.map(function(cat){
     newState.categories.push(cat.category_name+" ")
   })
-  this.setState(newState)
+            that.setState(newState)
+            
+              
+        }
+    })
+    xhrAddresses.open("GET", baseURL + "restaurant/"+this.props.match.params.id+"/");
+    xhrAddresses.setRequestHeader("Authorization", "Bearer " + access_token); //sessionStorage.getItem('access-token')
+    xhrAddresses.setRequestHeader("Content-Type", "application/json");
+    xhrAddresses.setRequestHeader("Cache-Control", "no-cache");
+    xhrAddresses.setRequestHeader("Access-Control-Allow-Origin", "*");  
+    xhrAddresses.send(data);
+   
+    
+
   }
 
   addItem = (item, id) => {
-    console.log(item);
 
     this.state.data.push({
       id: id,
@@ -73,7 +95,6 @@ class Details extends Component {
     this.setState({
       total: this.state.total + price
     });
-    console.log(this.state.total);
   };
 
   checkoutHandler = () =>{
@@ -85,8 +106,8 @@ class Details extends Component {
   render() {
     let that = this;
     const { classes } = this.props;
-    let { categories } = restaurantData;
-  
+    let  { categories } = restaurantData;
+
     let items = this.state.data.map(function(item, index) {
       return (
         <Cart
@@ -98,21 +119,23 @@ class Details extends Component {
         />
       );
     });
-    //console.log(categories);
     let catId = 0;
+    let test = this.state.restaurantData.address;
+    
 
     return (
+   
       <div>
         <div className="up-container">
           <div className='img-container'>
-            <img className={classes.image} src={restaurantData.photo_URL}></img>
+            <img className={classes.image} src={this.state.restaurantData.photo_URL}></img>
           </div>
           <div className='info-container'>
               <div className='res-name'>
-                <h3>{restaurantData.restaurant_name}</h3>
+                <h3>{this.state.restaurantData.restaurant_name}</h3>
               </div>
               <div className='address-container'>
-                <p>{restaurantData.address.locality}</p>
+                <p>{this.state.address.locality}</p>
               </div>
               <div className='catagory-container'>
                 <p>{this.state.categories}</p>
@@ -121,13 +144,13 @@ class Details extends Component {
                 <div className='avg-rating'>
                   <div>
                     <Grade/>
-                    <span className='rating'>{restaurantData.customer_rating}</span>
+                    <span className='rating'>{this.state.restaurantData.customer_rating}</span>
                   </div>
-                  <div>AVERAGE RATING BY {restaurantData.number_customers_rated} CUSTOMERS</div>
+                  <div>AVERAGE RATING BY {this.state.restaurantData.number_customers_rated} CUSTOMERS</div>
                 </div>
                 <div className='avg-price'>
                 <div>
-                  <span>&#8377; {restaurantData.average_price}</span>
+                  <span>&#8377; {this.state.restaurantData.average_price}</span>
                 </div>
                 <div>AVERAGE COST FOR TWO PEOPLE</div>
                 </div>
@@ -138,7 +161,8 @@ class Details extends Component {
           <div className="left-container">
             <Grid item xs={12}>
               <div className={classes.demo}>
-                {categories.map((val, index) => {
+              
+                {this.state.categoriesList.map((val, index) => {
                   catId += 1;
                   return (
                     <List key={"item" + index}>
