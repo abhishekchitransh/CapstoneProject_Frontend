@@ -24,6 +24,9 @@ import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
 import Popper from '@material-ui/core/Popper';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
+import Snackbar from '@material-ui/core/Snackbar';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
 
 
 const customStyles = {
@@ -90,10 +93,11 @@ constructor(){
     registrationSuccess: false,    
     loginErrorMsg : "",
     signUpErrorMsg : "",
-    loggedIn: sessionStorage.getItem('access-token') == null ? false : true,
+    loggedIn: true,
     showUserProfileDropDown:false,
-    open:true,
-    anchorEl:null
+    open:false,
+    anchorEl:null,
+    snackBarOpen
   }
 }
 
@@ -106,8 +110,7 @@ inputPasswordChangeHandler = (e) => {
 }
 
 inputEmailChangeHandler = (e) => {
-  this.setState({ email: e.target.value })
-
+  this.setState({ email: e.target.value })  
 }
 
 inputFirstnameChangeHandler = (e) => {
@@ -145,7 +148,7 @@ loginClickHandler = () => {
   xhrLogin.addEventListener("readystatechange", function () {  
       if (this.readyState === 4) {          
           let loginResponse = JSON.parse(xhrLogin.response);          
-          if(loginResponse.code === 'ATH-001'){
+          if(loginResponse.code === 'ATH-001' || loginResponse.code === 'ATH-002' ){
             that.setState({loginError : "dispBlock"});
             that.setState({loginErrorMsg : loginResponse.message});
           }else{
@@ -165,46 +168,52 @@ loginClickHandler = () => {
   xhrLogin.send(dataLogin);
  
 }
-
-registerClickHandler = () => {
-  this.state.email === "" ? this.setState({ emailRequired: "dispBlock" }) : this.setState({ emailRequired: "dispNone" });
+checkForm = () => {  
+  this.state.email === "" ? this.setState({ emailRequired: "dispBlock" }) : this.setState({ emailRequired: "dispNone" });  
   this.state.firstname === "" ? this.setState({ firstnameRequired: "dispBlock" }) : this.setState({ firstnameRequired: "dispNone" });
   this.state.lastname === "" ? this.setState({ lastnameRequired: "dispBlock" }) : this.setState({ lastnameRequired: "dispNone" });
   this.state.mobile === "" ? this.setState({ mobileRequired: "dispBlock" }) : this.setState({ mobileRequired: "dispNone" });
-  this.state.passwordReg === "" ? this.setState({ passwordRegRequired: "dispBlock" }) : this.setState({ passwordRegRequired: "dispNone" });
-  if (this.state.email === "" || this.state.firstname === "" || this.state.lastname === "" || this.state.mobile === "" || this.state.passwordReg === "") { return; }
+  this.state.passwordReg === "" ? this.setState({ passwordRegRequired: "dispBlock" }) : this.setState({ passwordRegRequired: "dispNone" });      
+  if (this.state.email === "" || this.state.firstname === "" || this.state.lastname === "" || this.state.mobile === "" || this.state.passwordReg === "") {return;}      
+{/*var strongRegex = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})");
+  var emailRegex = new RegExp(/^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i);
+  emailRegex.test(this.state.email) === false ? this.setState({formValid:false, emailRequired: "dispBlock", emailMsg : "Invalid eMail"}) : this.setState({ emailRequired: "dispNone", formValid : true });
+strongRegex.test(this.state.passwordReg) === false ? this.setState({formValid:false , passwordRegRequired: "dispBlock", passwordMsg : "Weak Password"}) : this.setState({ passwordRegRequired: "dispNone", formValid : true });  */}
+}
+registerClickHandler = () => {    
+    let that = this;
+    let dataSignUp = JSON.stringify({    
+          "contact_number": this.state.mobile,
+          "email_address": this.state.email,
+          "first_name": this.state.firstname,
+          "last_name": this.state.lastname,
+          "password": this.state.passwordReg
+    })
+        
+    let xhrSignup = new XMLHttpRequest();
+    xhrSignup.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
+            console.log(this.response);
+            let signupResponse = JSON.parse(this.response);
+            if(signupResponse.code === 'SGR-001' 
+              || signupResponse.code === 'SGR-002' 
+              || signupResponse.code === 'SGR-003' 
+              || signupResponse.code === 'SGR-004'){
+              that.setState({signupError : "dispBlock"});
+              that.setState({"signUpErrorMsg":signupResponse.message});            
+            }else{
+              that.setState({ registrationSuccess: true });
+              that.openMessageHandler();
+              that.closeModalHandler();
+            }
+        }
+    })
 
-  let that = this;
-  let dataSignUp = JSON.stringify({    
-        "contact_number": this.state.mobile,
-        "email_address": this.state.email,
-        "first_name": this.state.firstname,
-        "last_name": this.state.lastname,
-        "password": this.state.passwordReg
-  })
-
-  console.log(dataSignUp);
-  
-  let xhrSignup = new XMLHttpRequest();
-  xhrSignup.addEventListener("readystatechange", function () {
-      if (this.readyState === 4) {
-          console.log(this.response);
-          let signupResponse = JSON.parse(this.response);
-          if(signupResponse.code === 'SGR-001'){
-            that.setState({signupError : "dispBlock"});
-            that.setState({"signUpErrorMsg":signupResponse.message});
-            console.log(that.state.signUpErrorMsg)
-          }else{
-            that.setState({ registrationSuccess: true })
-          }
-      }
-  })
-
-  xhrSignup.open("POST", this.props.baseUrl + "signup");
-  xhrSignup.setRequestHeader("Content-Type", "application/json");
-  xhrSignup.setRequestHeader("Cache-Control", "no-cache");
-  xhrSignup.send(dataSignUp);
- 
+    xhrSignup.open("POST", this.props.baseUrl + "customer/signup");
+    xhrSignup.setRequestHeader("Content-Type", "application/json");
+    xhrSignup.setRequestHeader("Cache-Control", "no-cache");
+    xhrSignup.setRequestHeader("Access-Control-Allow-Origin", "*");  
+    xhrSignup.send(dataSignUp);  
 }
 
 openModalHandler = () => {
@@ -217,6 +226,9 @@ closeModalHandler = () => {
 
 tabChangeHandler = (event, value) => {
   this.setState({ value });
+}
+openMessageHandler = () => {
+  this.setState({snackBarOpen:true})  
 }
 
 profileIconClickHandler = (e) => {
@@ -231,6 +243,13 @@ handleClose = () => {
     open:false,
     showUserProfileDropDown: !this.state.showUserProfileDropDown
   })
+}
+
+handleSnackBarClose = (event, reason) => {
+  if (reason === 'clickaway') {
+    return;
+  }
+  this.setState({snackBarOpen:false})
 }
 
 render(){  
@@ -292,6 +311,7 @@ render(){
                     </Tabs>
                     {this.state.value === 0 &&
                         <TabContainer>
+                        
                             <FormControl required className={classes.formControl}>
                                 <InputLabel htmlFor="username"> Contact No. </InputLabel>
                                 <Input id="username" type="text" username={this.state.username} onChange={this.inputUsernameChangeHandler} />
@@ -306,44 +326,70 @@ render(){
                             <Button variant="contained" color="primary" onClick={this.loginClickHandler} className={classes.formControl}>LOGIN</Button>
                         </TabContainer>}
                     {this.state.value === 1 && <TabContainer>                       
+                      <form>
                         <FormControl required className={classes.formControl}>
                             <InputLabel htmlFor="firstname">First Name</InputLabel>
-                            <Input id="firstname" onChange={this.inputFirstnameChangeHandler} />
+                            <Input id="firstname" type="text" onChange={this.inputFirstnameChangeHandler}  value={this.state.firstname}/>
                             <FormHelperText className={this.state.firstnameRequired}><span className="red">required</span></FormHelperText>
                         </FormControl><br /><br />
                         <FormControl required className={classes.formControl}>
                             <InputLabel htmlFor="lastname">Last Name</InputLabel>
-                            <Input id="lastname" onChange={this.inputLastnameChangeHandler} />
+                            <Input id="lastname" type="text" onChange={this.inputLastnameChangeHandler} value={this.state.lastname}/>
                             <FormHelperText className={this.state.lastnameRequired}><span className="red">required</span></FormHelperText>
                         </FormControl><br /><br />
                         <FormControl required className={classes.formControl}>
                             <InputLabel htmlFor="email">Email</InputLabel>
-                            <Input id="email" type="email" onChange={this.inputEmailChangeHandler} />
-                            <FormHelperText className={this.state.emailRequired}><span className="red">required</span></FormHelperText>
+                            <Input id="email" type="email" onChange={this.inputEmailChangeHandler} value={this.state.email}/>
+                            <FormHelperText className={this.state.emailRequired}><span className="red">required valid email</span></FormHelperText>
                         </FormControl><br /><br />
                         <FormControl required className={classes.formControl}>
                             <InputLabel htmlFor="mobile">Mobile Number</InputLabel>
-                            <Input id="mobile" onChange={this.inputMobileChangeHandler} />
+                            <Input id="mobile" type="number" onChange={this.inputMobileChangeHandler} value={this.state.mobile}/>
                             <FormHelperText className={this.state.mobileRequired}><span className="red">required</span></FormHelperText>
                         </FormControl><br /><br />
                         <FormControl required aria-describedby="name-helper-text" className={classes.formControl}>
                             <InputLabel htmlFor="passwordReg">Password</InputLabel>
-                            <Input type="password" id="passwordReg" onChange={this.inputPasswordRegChangeHandler} />
-                            <FormHelperText className={this.state.passwordRegRequired}><span className="red">required</span></FormHelperText>
+                            <Input type="password" id="passwordReg" onChange={this.inputPasswordRegChangeHandler}/>
+                            <FormHelperText className={this.state.passwordRegRequired}><span className="red">required strong password</span></FormHelperText>
                         </FormControl><br /><br />
                         {this.state.registrationSuccess === false &&
                             <FormControl className={classes.formControl}>
                               <Typography variant="subtitle1" color="error" className={this.state.signupError} align="left">{this.state.signUpErrorMsg}</Typography>                                                              
                             </FormControl>}<br /><br />
-                        {this.state.registrationSuccess === true &&
+                        {/*this.state.registrationSuccess === true &&
                             <FormControl className={classes.formControl}>
                                 <span className="successText"> Registration Successful. Please Login!</span>
-                            </FormControl>}<br /><br />
+                            </FormControl><br /><br />*/}
                         <Button variant="contained" color="primary" onClick={this.registerClickHandler} className={classes.formControl}>
                             REGISTER
                         </Button>
+                        </form>
                     </TabContainer>}
                 </Modal>
+                <Snackbar
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                  }}
+                  open={this.state.snackBarOpen}
+                  autoHideDuration={6000}
+                  onClose={this.handleSnackBarClose}
+                  ContentProps={{
+                    'aria-describedby': 'message-id',
+                  }}
+                  message={<span id="message-id">Registration Successful. Please Login!</span>}
+                  action={[              
+                    <IconButton
+                      key="close"
+                      aria-label="Close"
+                      color="inherit"
+                      className={classes.close}
+                      onClick={this.handleSnackBarClose}
+                    >
+                      <CloseIcon />
+                    </IconButton>,
+                  ]}
+                />
         </div>        
     );
   }
