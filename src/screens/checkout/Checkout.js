@@ -32,8 +32,6 @@ import MenuItem from '@material-ui/core/MenuItem';
 import SummaryCard from './SummaryCard';
 import CustomerAddress from './CustomerAddress';
 
-import { getCountry } from '../../common/dataServices';
-
 const styles = muiBaseTheme => ({
   root: {
     width: "100%"
@@ -109,8 +107,7 @@ class Checkout extends Component {
         super();
         this.state = {            
             value:0, 
-            activeStep : 0,
-            data:getCountry(), 
+            activeStep : 0,            
             dataAddress:[],           
             selected:'IN',
             dataPayments:[],
