@@ -76,7 +76,7 @@ class Home extends Component{
         const { classes } = this.props;
         return(
             <div>                
-                <Header baseUrl={this.props.baseUrl} searchRestaurantsByName = {this.searchRestaurantsByName} showSearch="true" history={this.props.history} />
+                <Header baseUrl={this.props.baseUrl} searchRestaurantsByName = {this.searchRestaurantsByName} showSearch={true} history={this.props.history} />
 					<Grid container spacing={3} style={{padding:"1% 2%"}}>
                     {						
                         this.state.imageData.map((resItem,index) =>
