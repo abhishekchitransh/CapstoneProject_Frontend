@@ -96,6 +96,7 @@ class Home extends Component{
                         )
                     }
 					</Grid>
+                    {this.state.imageData.length === 0 && (<div>No restaurant with the given name</div>)}
                 <div>
                     <h1>Users</h1>
                     <strong>select a user</strong>
