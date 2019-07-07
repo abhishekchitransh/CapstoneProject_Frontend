@@ -97,7 +97,7 @@ constructor(){
     showUserProfileDropDown:false,
     open:false,
     anchorEl:null,
-    snackBarOpen
+    snackBarOpen:false
   }
 }
 
@@ -252,6 +252,14 @@ handleSnackBarClose = (event, reason) => {
   this.setState({snackBarOpen:false})
 }
 
+logoutClickHandler = () => {console.log('log out');
+  sessionStorage.removeItem("access-token");
+  sessionStorage.removeItem("user-details");
+  this.props.history.push({
+    pathname: "/"
+  });
+};
+
 render(){  
     const { classes } = this.props;
     let logoToRender = null;
@@ -291,7 +299,7 @@ render(){
                           <ClickAwayListener onClickAway={this.handleClose}>
                               <MenuList>
                                 <MenuItem onClick={this.handleClose}><Link to="/profile" style={{ textDecoration: 'none',color:"black" }}>My Profile</Link></MenuItem>
-                                <MenuItem onClick={this.logoutHandler}>Logout</MenuItem>
+                                <MenuItem onClick={this.logoutClickHandler}>Logout</MenuItem>
                               </MenuList>
                           </ClickAwayListener>
                         </Paper>
