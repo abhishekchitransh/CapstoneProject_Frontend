@@ -192,8 +192,7 @@ registerClickHandler = () => {
         
     let xhrSignup = new XMLHttpRequest();
     xhrSignup.addEventListener("readystatechange", function () {
-        if (this.readyState === 4) {
-            console.log(this.response);
+        if (this.readyState === 4) {            
             let signupResponse = JSON.parse(this.response);
             if(signupResponse.code === 'SGR-001' 
               || signupResponse.code === 'SGR-002' 
@@ -252,7 +251,7 @@ handleSnackBarClose = (event, reason) => {
   this.setState({snackBarOpen:false})
 }
 
-logoutClickHandler = () => {console.log('log out');
+logoutClickHandler = () => {
   sessionStorage.clear();  
   this.props.history.push({
     pathname: "/"

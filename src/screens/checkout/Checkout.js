@@ -261,50 +261,53 @@ class Checkout extends Component {
       xhrSaveAddress.send(dataAddress);  
     }
     addressChangeHandler = () => {
-        this.state.selAddress = sessionStorage.getItem("selAddress");
+        this.setState({selAddress: sessionStorage.getItem("selected")});
     }
     checkoutHandler = () => {      
-      let dataItem = [];            
-      if(this.state.selAddress == null){
+      let dataItem = [];      
+      if(this.state.selAddress == ""){
         this.setState({saveOrderResponse : "Please select Address"})        
-        this.openMessageHandler();                           
+        this.openMessageHandler();   
+        return;                        
       }else if(this.state.paymentMethod === ""){
         this.setState({saveOrderResponse : "Please select payment method"})        
         this.openMessageHandler();                   
+        return;
       }
-
+      
       let orders = JSON.parse(localStorage.getItem("orders"));            
       let dataCheckout = JSON.stringify({                    
-          "address_id": this.address_id,
+          "address_id": this.state.selAddress,
           "bill": localStorage.getItem("OrderDataTotal"),
           "coupon_id": "",
           "discount": 0,
           "item_quantities": 
             orders.map(item => (
               {
-              "item_id ":  item.id,
+              "item_id":  item.id,
               "price" : item.price,
               "quantity" : item.qty
               }))
           ,
           "payment_id": this.state.paymentMethod,
           "restaurant_id": sessionStorage.getItem("selRestaurant")        
-      })    
+      })       
       let that = this;
       let xhrCheckout = new XMLHttpRequest();
       xhrCheckout.addEventListener("readystatechange", function () {
           if (this.readyState === 4) {              
               let checkoutResponse = JSON.parse(this.response);              
                 that.setState({saveOrderResponse : checkoutResponse.message});
-                this.openMessageHandler();                              
+                that.openMessageHandler();                              
           }
       })
   
-      xhrCheckout.open("POST", this.props.baseUrl + "address");
+      xhrCheckout.open("POST", this.props.baseUrl + "order");
+      xhrCheckout.setRequestHeader("Authorization", "Bearer " + access_token); //sessionStorage.getItem('access-token')
       xhrCheckout.setRequestHeader("Content-Type", "application/json");
       xhrCheckout.setRequestHeader("Cache-Control", "no-cache");
       xhrCheckout.setRequestHeader("Access-Control-Allow-Origin", "*");  
-      xhrCheckout.send(dataCheckout);  
+      xhrCheckout.send(dataCheckout);
     }
     openMessageHandler = () => {
       this.setState({snackBarOpen:true})  

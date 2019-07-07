@@ -18,6 +18,10 @@ import ShoppingCart from "@material-ui/icons/ShoppingCart";
 import { Button } from "@material-ui/core";
 import { Link } from 'react-router-dom';
 
+import Snackbar from '@material-ui/core/Snackbar';
+import CloseIcon from '@material-ui/icons/Close';
+
+
 const AdapterLink = React.forwardRef((props, ref) => <Link innerRef={ref} {...props} />)
 let access_token=sessionStorage.getItem('access-token');
 
@@ -41,7 +45,9 @@ class Details extends Component {
       categories:[],
       restaurantData:[],
       categoriesList:[],
-      address:[]
+      address:[],
+      snackBarOpen : false,
+      cartResponse : ""
     };
    
   }
@@ -51,8 +57,7 @@ class Details extends Component {
     let newState = this.state;
     let data = null   
     let xhrAddresses = new XMLHttpRequest();
-    let that = this;
-    sessionStorage.clear();
+    let that = this;    
     sessionStorage.setItem("selRestaurant",this.props.match.params.id);
     xhrAddresses.addEventListener("readystatechange", function () {  
         if (this.readyState === 4) {                                      
@@ -86,13 +91,16 @@ class Details extends Component {
     if(this.state.data.length===0)
     {
       this.state.data.push({
-        id: id,
+        id: item.id,
         name: item.item_name,
         type: item.item_type,
-        price: item.price
+        price: item.price,
+        qty : 1
       });
       this.state.total += item.price;
-      this.setState(this.state); 
+      this.setState(this.state);
+      this.setState({cartResponse: item.item_name + " added to cart"}) 
+      this.openMessageHandler();
     }
     else
     {
@@ -100,13 +108,17 @@ class Details extends Component {
       if(check === -1)
       {
         this.state.data.push({
-          id: id,
+          id: item.id,
           name: item.item_name,
           type: item.item_type,
-          price: item.price
+          price: item.price,
+          qty : 1
+
         });
         this.state.total += item.price;
-        this.setState(this.state);       
+        this.setState(this.state); 
+        this.setState({cartResponse: item.item_name + " added to cart"}) 
+        this.openMessageHandler();           
       }
     }
   };
@@ -123,16 +135,32 @@ class Details extends Component {
   };
 
   checkoutHandler = () =>{
-    localStorage.setItem("orders",JSON.stringify(this.state.data));
-    localStorage.setItem("OrderDataTotal", this.state.total);
+    if(this.state.data.length === 0){
+      this.openMessageHandler();
+      this.setState({cartResponse:"Please add an item to the cart"})
+      return;
+    }else{
+      localStorage.setItem("orders",JSON.stringify(this.state.data));
+      localStorage.setItem("OrderDataTotal", this.state.total);
+      this.props.history.push("/checkout")
+    }
   }
   handlePopHere=(id)=>{
     let val;
     const newData = this.state.data.filter(elem => elem.id != id);
     this.setState({data: newData});
   
- }
+  }
 
+  openMessageHandler = () => {
+    this.setState({snackBarOpen:true})  
+  }
+  handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    this.setState({snackBarOpen:false})
+  }
 
   render() {
     let that = this;
@@ -210,6 +238,7 @@ class Details extends Component {
                         addItem={this.addItem}
                         items={val.item_list}
                         id={"item" + catId + index}
+                        item_id = {val.id}
                       />
                     </List>
                   );
@@ -250,10 +279,10 @@ class Details extends Component {
                         <Button variant="contained"
                             color="primary"
                             size="large"
-                            fullWidth="true"
+                            fullWidth={true}
                             aria-label="Large contained secondary button group"
                             onClick={this.checkoutHandler}
-                            component={AdapterLink} to="/checkout">CHECKOUT
+                            >CHECKOUT
                         </Button>
                       </Grid>
                   </CardContent>
@@ -262,6 +291,30 @@ class Details extends Component {
             </Grid>
           </div>
         </div>
+        <Snackbar
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                  }}
+                  open={this.state.snackBarOpen}
+                  autoHideDuration={6000}
+                  onClose={this.handleClose}
+                  ContentProps={{
+                    'aria-describedby': 'message-id',
+                  }}
+                  message={<span id="message-id">{this.state.cartResponse}</span>}
+                  action={[              
+                    <IconButton
+                      key="close"
+                      aria-label="Close"
+                      color="inherit"
+                      className={classes.close}
+                      onClick={this.handleClose}
+                    >
+                      <CloseIcon />
+                    </IconButton>,
+                  ]}
+                />
       </div>
     );
   }

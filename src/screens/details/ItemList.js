@@ -27,8 +27,7 @@ test = (val)=>{
 addItem = ()=>{
     this.props.addItem.bind(this.state.addedItem);
 }
-sendData=(val)=>{
-    console.log(val)
+sendData=(val)=>{    
     this.test(val);
     return (this.props.addItem.bind(this,this.state.addedItem));
 }
