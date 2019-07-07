@@ -76,7 +76,7 @@ class Home extends Component{
         const { classes } = this.props;
         return(
             <div>                
-                <Header baseUrl={this.props.baseUrl} searchRestaurantsByName = {this.searchRestaurantsByName} showSearch="true" history={this.props.history} />
+                <Header baseUrl={this.props.baseUrl} searchRestaurantsByName = {this.searchRestaurantsByName} showSearch={true} history={this.props.history} />
 					<Grid container spacing={3} style={{padding:"1% 2%"}}>
                     {						
                         this.state.imageData.map((resItem,index) =>
@@ -96,6 +96,7 @@ class Home extends Component{
                         )
                     }
 					</Grid>
+                    {this.state.imageData.length === 0 && (<div>No restaurant with the given name</div>)}
                 <div>
                     <h1>Users</h1>
                     <strong>select a user</strong>
