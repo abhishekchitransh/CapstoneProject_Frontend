@@ -23,6 +23,7 @@ import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 
 import { FormControl, InputLabel, Input, Select, AppBar } from "@material-ui/core";
+import FormHelperText from '@material-ui/core/FormHelperText';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -31,6 +32,10 @@ import MenuItem from '@material-ui/core/MenuItem';
 
 import SummaryCard from './SummaryCard';
 import CustomerAddress from './CustomerAddress';
+
+import Snackbar from '@material-ui/core/Snackbar';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
 
 const styles = muiBaseTheme => ({
   root: {
@@ -109,10 +114,23 @@ class Checkout extends Component {
             value:0, 
             activeStep : 0,            
             dataAddress:[],           
-            selected:'IN',
+            selected:0,
             dataPayments:[],
-            paymentMethod:[],
-            dataStates:[]
+            paymentMethod:"",
+            dataStates:[], 
+            flatBldNo : "",
+            flatBldNoRequired : 'dispNone',
+            locality:"",
+            localityRequired : 'dispNone',
+            city:"",
+            cityRequired : 'dispNone',
+            pincode:"",
+            pincodeRequired : 'dispNone',
+            saveAddressSuccess : false,
+            saveAddressError : 'dispNone',
+            saveAddressErrorMsg : '',
+            checkOutAddressRequired : 'dispNone',
+            selAddress : ""
         };
     }
     renderOptions() {
@@ -190,10 +208,115 @@ class Checkout extends Component {
 
     handleChange = (event) => {
       this.setState({paymentMethod:event.target.value})
+      sessionStorage.setItem("paymentMethod", event.target.value);
     }
 
-    getStepContent= (step) => { 
-      console.log(this.state.dataStates);       
+    flatBldNoChangeHandler = (e) => {
+      this.setState({ flatBldNo: e.target.value })    
+    }
+    localityChangeHandler = (e) => {
+      this.setState({locality : e.target.value })
+    }
+    cityChangeHandler = (e) => { 
+      this.setState({city : e.target.value })
+    }
+    pinCodeChangeHandler = (e) => {
+      this.setState({pincode : e.target.value })
+    }
+    addressClickHandler = () =>    
+    {
+      this.state.flatBldNo === "" ? this.setState({ flatBldNoRequired: "dispBlock" }) : this.setState({ flatBldNoRequired: "dispNone" });      
+      this.state.locality === "" ? this.setState({ localityRequired: "dispBlock" }) : this.setState({ localityRequired: "dispNone"});
+      this.state.city === "" ? this.setState({ cityRequired: "dispBlock" }) : this.setState({ cityRequired: "dispNone" });
+      this.state.pincode === "" ? this.setState({ pincodeRequired: "dispBlock" }) : this.setState({ pincodeRequired: "dispNone" });
+      this.state.selected === 0 ? this.setState({ stateRequired: "dispBlock" }) : this.setState({ stateRequired: "dispNone" });
+      
+      if(this.state.flatBldNo === "" || this.state.locality === "" || this.state.city === "" || this.state.pincode === ""  || this.state.selected === ""){return}
+      
+      let dataAddress = JSON.stringify({            
+          "city": this.state.city,
+          "flat_building_name": this.state.flatBldNo,
+          "locality": this.state.locality,
+          "pincode": this.state.pincode,
+          "state_uuid": this.state.selected       
+      })
+      let that = this;
+      let xhrSaveAddress = new XMLHttpRequest();
+      xhrSaveAddress.addEventListener("readystatechange", function () {
+          if (this.readyState === 4) {              
+              let saveAddressResponse = JSON.parse(this.response);
+              if(saveAddressResponse.code === 'SAR-002' || saveAddressResponse.code === 'SAR-002'){
+                that.setState({saveAddressError : "dispBlock"});
+                that.setState({"saveAddressErrorMsg":saveAddressResponse.message});            
+              }else{
+                that.setState({ saveAddressSuccess: true });                
+              }
+          }
+      })
+  
+      xhrSaveAddress.open("POST", this.props.baseUrl + "address");
+      xhrSaveAddress.setRequestHeader("Content-Type", "application/json");
+      xhrSaveAddress.setRequestHeader("Cache-Control", "no-cache");
+      xhrSaveAddress.setRequestHeader("Access-Control-Allow-Origin", "*");  
+      xhrSaveAddress.send(dataAddress);  
+    }
+    addressChangeHandler = () => {
+        this.state.selAddress = sessionStorage.getItem("selAddress");
+    }
+    checkoutHandler = () => {      
+      let dataItem = [];            
+      if(this.state.selAddress == null){
+        this.setState({saveOrderResponse : "Please select Address"})        
+        this.openMessageHandler();                           
+      }else if(this.state.paymentMethod === ""){
+        this.setState({saveOrderResponse : "Please select payment method"})        
+        this.openMessageHandler();                   
+      }
+
+      let orders = JSON.parse(localStorage.getItem("orders"));            
+      let dataCheckout = JSON.stringify({                    
+          "address_id": this.address_id,
+          "bill": localStorage.getItem("OrderDataTotal"),
+          "coupon_id": "",
+          "discount": 0,
+          "item_quantities": 
+            orders.map(item => (
+              {
+              "item_id ":  item.id,
+              "price" : item.price,
+              "quantity" : item.qty
+              }))
+          ,
+          "payment_id": this.state.paymentMethod,
+          "restaurant_id": sessionStorage.getItem("selRestaurant")        
+      })    
+      let that = this;
+      let xhrCheckout = new XMLHttpRequest();
+      xhrCheckout.addEventListener("readystatechange", function () {
+          if (this.readyState === 4) {              
+              let checkoutResponse = JSON.parse(this.response);              
+                that.setState({saveOrderResponse : checkoutResponse.message});
+                this.openMessageHandler();                              
+          }
+      })
+  
+      xhrCheckout.open("POST", this.props.baseUrl + "address");
+      xhrCheckout.setRequestHeader("Content-Type", "application/json");
+      xhrCheckout.setRequestHeader("Cache-Control", "no-cache");
+      xhrCheckout.setRequestHeader("Access-Control-Allow-Origin", "*");  
+      xhrCheckout.send(dataCheckout);  
+    }
+    openMessageHandler = () => {
+      this.setState({snackBarOpen:true})  
+    }
+    handleClose = (event, reason) => {
+      if (reason === 'clickaway') {
+        return;
+      }
+      this.setState({snackBarOpen:false})
+    }
+    getStepContent= (step) => {       
+      
         switch (step) {
           case 0:
             return (
@@ -217,7 +340,7 @@ class Checkout extends Component {
                               {
                                 this.state.dataAddress.map((val, idx) => ( 
                                   <Grid item xs={4} key={val.id}>
-                                    <CustomerAddress address={val} key={val.id + "_" + idx} />                                 
+                                    <CustomerAddress address={val} key={val.id + "_" + idx} changeAddress={this.addressChangeHandler}/>                                 
                                   </Grid>                                       
                               ))            
                               }
@@ -233,21 +356,27 @@ class Checkout extends Component {
                                     <Input 
                                         id="FlatBldNo"
                                         type="text"
+                                        onChange={this.flatBldNoChangeHandler}  
                                     />
+                                    <FormHelperText className={this.state.flatBldNoRequired}><span className="red">required</span></FormHelperText>
                                 </FormControl><br/><br />
                                 <FormControl required className={this.props.formControl}>
                                     <InputLabel htmlFor="Locality">Locality</InputLabel>
                                     <Input 
                                         id="Locality"
                                         type="text"
+                                        onChange={this.localityChangeHandler}  
                                     />
+                                    <FormHelperText className={this.state.localityRequired}><span className="red">required</span></FormHelperText>
                                 </FormControl><br/><br/>
                                 <FormControl required className={this.props.formControl}>
                                     <InputLabel htmlFor="city">City</InputLabel>
                                     <Input 
                                         id="City"
                                         type="text"
+                                        onChange={this.cityChangeHandler}  
                                     />
+                                    <FormHelperText className={this.state.cityRequired}><span className="red">required</span></FormHelperText>
                                 </FormControl><br/><br/>                                
                                 <FormControl required className={this.props.formControl}>
                                     <InputLabel htmlFor="State" shrink>State</InputLabel>
@@ -262,20 +391,26 @@ class Checkout extends Component {
                                                 Select State
                                             </MenuItem>                                   
                                             {this.state.dataStates.map((state,i) => (                                                
-                                            <MenuItem key={"state_" + state.id + "_" + i} value={state.state_name}>
+                                            <MenuItem key={"state_" + state.id + "_" + i} value={state.id}>
                                                 {state.state_name}
                                             </MenuItem>
                                             ))}
                                         </Select>
+                                        <FormHelperText className={this.state.stateRequired}><span className="red">required</span></FormHelperText>
                                 </FormControl><br/><br/>
                                 <FormControl required className={this.props.formControl}>
                                     <InputLabel htmlFor="Pincode">Pin Code</InputLabel>
                                     <Input 
                                         id="Pincode"
                                         type="text"
+                                        onChange={this.pinCodeChangeHandler}  
                                     />
+                                    <FormHelperText className={this.state.pincodeRequired}><span className="red">required</span></FormHelperText>
                                 </FormControl><br/><br/>
-                                <Button variant="contained" color="primary" onClick={this.addressClickHandler} className={this.props.formControl}>
+                                <FormControl className={this.props.formControl}>
+                                  <Typography variant="subtitle1" color="error" className={this.state.saveAddressError} align="left">{this.state.saveAddressErrorMsg}</Typography>                                                              
+                                </FormControl>}<br /><br />
+                                <Button variant="contained" fullWidth={true} color="primary" onClick={this.addressClickHandler} className={this.props.formControl}>
                                   SAVE ADDRESS
                                 </Button>                                                        
                             </div>
@@ -296,7 +431,7 @@ class Checkout extends Component {
                   onChange={this.handleChange}
                 >
               {this.state.dataPayments.map((val, index) => (                
-                <FormControlLabel value={val.payment_name} control={<Radio />} label={val.payment_name} key={index}/>                
+                <FormControlLabel value={val.id} control={<Radio />} label={val.payment_name} key={index}/>                
               ))}
               </RadioGroup>
               </FormControl>
@@ -372,13 +507,37 @@ class Checkout extends Component {
             </div>
           </Grid>
           <Grid item xs={12} md={4}>
-            <SummaryCard className={classes.summaryCard}
+            <SummaryCard className={classes.summaryCard} checkoutHandler = {this.checkoutHandler}
             key="test"
             index="1"
             classes={classes}    
             />
           </Grid>
         </Grid>
+        <Snackbar
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                  }}
+                  open={this.state.snackBarOpen}
+                  autoHideDuration={6000}
+                  onClose={this.handleClose}
+                  ContentProps={{
+                    'aria-describedby': 'message-id',
+                  }}
+                  message={<span id="message-id">{this.state.saveOrderResponse}</span>}
+                  action={[              
+                    <IconButton
+                      key="close"
+                      aria-label="Close"
+                      color="inherit"
+                      className={classes.close}
+                      onClick={this.handleClose}
+                    >
+                      <CloseIcon />
+                    </IconButton>,
+                  ]}
+                />
       </div>
     );
   }

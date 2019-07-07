@@ -92,8 +92,8 @@ constructor(){
     passwordRegRequired: "dispNone",
     registrationSuccess: false,    
     loginErrorMsg : "",
-    signUpErrorMsg : "",
-    loggedIn: true,
+    signUpErrorMsg : "",    
+    loggedIn: sessionStorage.getItem('access-token') == null ? false : true,
     showUserProfileDropDown:false,
     open:false,
     anchorEl:null,
@@ -134,7 +134,7 @@ inputPasswordRegChangeHandler = (e) => {
 }
 
 componentDidMount(){
-  console.log(this.props.baseUrl);
+  
 }
 loginClickHandler = () => {
   this.state.username === "" ? this.setState({ usernameRequired: "dispBlock" }) : this.setState({ usernameRequired: "dispNone" });
@@ -253,8 +253,7 @@ handleSnackBarClose = (event, reason) => {
 }
 
 logoutClickHandler = () => {console.log('log out');
-  sessionStorage.removeItem("access-token");
-  sessionStorage.removeItem("user-details");
+  sessionStorage.clear();  
   this.props.history.push({
     pathname: "/"
   });
@@ -277,7 +276,7 @@ render(){
             {this.props.showSearch &&
               <div className="header-search-container">
                 <div className="search-icon">
-                <SearchIcon style={{color:"white"}} />
+                <SearchIcon style={{color:"#FFFFFF"}}/>
               </div>          
               <Input
                 onChange={this.props.searchRestaurantsByName.bind(this)}

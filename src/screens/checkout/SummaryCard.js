@@ -37,7 +37,7 @@ const SummaryCard = function(props){
                                 {item.name}                            
                             </Grid>
                             <Grid item xs={3}>
-                                {item.type}                            
+                                {item.qty}                            
                             </Grid>
                             <Grid item xs={3}>
                                 {item.price}                            
@@ -68,7 +68,7 @@ const SummaryCard = function(props){
                 </Grid>                
             </CardContent>
             <CardActions>
-                <Button variant="contained" color="primary" className={classes.orderButton}>
+                <Button variant="contained" color="primary" className={classes.orderButton} onClick={props.checkoutHandler}>
                     Place Order
                 </Button>
             </CardActions>

@@ -6,22 +6,23 @@ import CardMedia from "@material-ui/core/CardMedia";
 import CardContent from "@material-ui/core/CardContent";
 import Divider from "@material-ui/core/Divider";
 import Typography from "@material-ui/core/Typography";
+import { CardActions } from "@material-ui/core";
+import IconButton from '@material-ui/core/IconButton';
+import CheckCircle from '@material-ui/icons/CheckCircle'
+
+
 
 const styles = muiBaseTheme => ({
   card: {
-    maxWidth: 250,
-    minWidth: 250,
-    maxHeight : 200,    
-    margin: "auto",
-    transition: "0.3s",
+    maxWidth: 250,        
     boxShadow: "3px -3px 0px 6px rgba(255,0,102,1)",    
   },
   media: {
+    height:0,
     paddingTop: "56.25%"
   },
   content: {
-    textAlign: "left",
-    padding: muiBaseTheme.spacing.unit * 3
+    textAlign: "left"    
   },
   divider: {
     margin: `${muiBaseTheme.spacing.unit * 3}px 0`
@@ -32,20 +33,29 @@ const styles = muiBaseTheme => ({
   subheading: {
     lineHeight: 1.8
   },
-  avatar: {
-    display: "inline-block",
-    border: "2px solid white",
-    "&:not(:first-of-type)": {
-      marginLeft: -muiBaseTheme.spacing.unit
-    }
-  }
+  CardAction:{
+    marginLeft : "auto",
+    flex:1
+  },
+  IconButton:{
+    color:"#009999"
+  }  
 });
+
 
 function TestCard( props ) {
     const classes = props.classes;
-    const address = props.address;
+    const address = props.address;   
+    const [value, setValue] = React.useState(0);
+        
+  function onAddressClick(address, value){    
+    sessionStorage.setItem("selAddress",JSON.stringify(address));  
+    sessionStorage.setItem("selected", address.id);  
+    setValue(1);
+    props.changeAddress();
+  }
     
-  return (
+  return (    
     <div className="App">
       <Card className={classes.card} key={address.id}>
         <CardContent className={classes.content}>
@@ -61,6 +71,11 @@ function TestCard( props ) {
           </Typography>          
           <Divider className={classes.divider} light />          
         </CardContent>
+        <CardActions disableSpacing className={classes.CardAction}>
+          <IconButton aria-label="Select Address" onClick={() => onAddressClick(address) }>            
+            {address.id === sessionStorage.getItem("selected") ? <CheckCircle  style={{color:"#009000"}}/> : <CheckCircle style={{color:"#999999"}} />}            
+          </IconButton>
+        </CardActions>
       </Card>
     </div>
   );
