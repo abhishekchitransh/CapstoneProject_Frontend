@@ -17,6 +17,14 @@ import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import { Link } from 'react-router-dom';
+import AccountCircle from '@material-ui/icons/AccountCircle';
+import { makeStyles } from '@material-ui/core/styles';
+import Paper from '@material-ui/core/Paper';
+import MenuItem from '@material-ui/core/MenuItem';
+import MenuList from '@material-ui/core/MenuList';
+import Popper from '@material-ui/core/Popper';
+import ClickAwayListener from '@material-ui/core/ClickAwayListener';
+
 
 const customStyles = {
   content: {
@@ -33,7 +41,8 @@ const styles = {
     color: "#FFFFFF"
   },
   searchInput: {
-    width: "80%"
+    width: "80%",
+    color:"white"
   },
   icon: {
     color: '#FFFFFF',
@@ -81,7 +90,10 @@ constructor(){
     registrationSuccess: false,    
     loginErrorMsg : "",
     signUpErrorMsg : "",
-    loggedIn: sessionStorage.getItem('access-token') == null ? false : true
+    loggedIn: sessionStorage.getItem('access-token') == null ? false : true,
+    showUserProfileDropDown:false,
+    open:true,
+    anchorEl:null
   }
 }
 
@@ -207,6 +219,20 @@ tabChangeHandler = (event, value) => {
   this.setState({ value });
 }
 
+profileIconClickHandler = (e) => {
+  this.setState({
+    showUserProfileDropDown: !this.state.showUserProfileDropDown,
+    anchorEl:e.currentTarget
+  });
+};
+
+handleClose = () => {
+  this.setState({
+    open:false,
+    showUserProfileDropDown: !this.state.showUserProfileDropDown
+  })
+}
+
 render(){  
     const { classes } = this.props;
     let logoToRender = null;
@@ -224,7 +250,7 @@ render(){
             {this.props.showSearch &&
               <div className="header-search-container">
                 <div className="search-icon">
-                <SearchIcon />
+                <SearchIcon style={{color:"white"}} />
               </div>          
               <Input
                 onChange={this.props.searchRestaurantsByName.bind(this)}
@@ -235,11 +261,23 @@ render(){
             }                        
             {!this.state.loggedIn ?
               <div className="login-button">
-                  <Button variant="contained" color="default" onClick={this.openModalHandler}>Login</Button>
+                  <Button variant="contained" color="default" onClick={this.openModalHandler}><AccountCircle />Login</Button>
               </div>
               :
-              <div className="login-button">
-                  <Button variant="contained" color="default" onClick={this.logoutHandler}>Logout</Button>
+              <div className="login-button">                  
+                  <Button variant="contained" color="default" onClick={this.profileIconClickHandler}><AccountCircle /> {this.state.firstname}</Button>
+                  {this.state.showUserProfileDropDown ? (
+                      <Popper open={this.state.open} anchorEl={this.state.anchorEl} keepMounted transition disablePortal>
+                        <Paper className={classes.paper}>
+                          <ClickAwayListener onClickAway={this.handleClose}>
+                              <MenuList>
+                                <MenuItem onClick={this.handleClose}><Link to="/profile" style={{ textDecoration: 'none',color:"black" }}>My Profile</Link></MenuItem>
+                                <MenuItem onClick={this.logoutHandler}>Logout</MenuItem>
+                              </MenuList>
+                          </ClickAwayListener>
+                        </Paper>
+                      </Popper>
+                  ) : null}                  
               </div>}                  
           </div>
           <Modal
