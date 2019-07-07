@@ -83,15 +83,32 @@ class Details extends Component {
   }
 
   addItem = (item, id) => {    
-    this.state.data.push({
-      id: id,
-      name: item.item_name,
-      type: item.item_type,
-      price: item.price,
-      qty : 1 
-    });    
-    this.state.total += item.price;
-    this.setState(this.state);
+    if(this.state.data.length===0)
+    {
+      this.state.data.push({
+        id: id,
+        name: item.item_name,
+        type: item.item_type,
+        price: item.price
+      });
+      this.state.total += item.price;
+      this.setState(this.state); 
+    }
+    else
+    {
+      const check = this.state.data.findIndex((elem) => elem.id === id);
+      if(check === -1)
+      {
+        this.state.data.push({
+          id: id,
+          name: item.item_name,
+          type: item.item_type,
+          price: item.price
+        });
+        this.state.total += item.price;
+        this.setState(this.state);       
+      }
+    }
   };
   handleTotalHandler = (price, item, qty) => {
     this.setState({
@@ -109,12 +126,17 @@ class Details extends Component {
     localStorage.setItem("orders",JSON.stringify(this.state.data));
     localStorage.setItem("OrderDataTotal", this.state.total);
   }
+  handlePopHere=(id)=>{
+    let val;
+    const newData = this.state.data.filter(elem => elem.id != id);
+    this.setState({data: newData});
+  
+ }
 
 
   render() {
     let that = this;
     const { classes } = this.props;
-   // let  { categories } = restaurantData;
 
     let items = this.state.data.map(function(item, index) {
       return (
@@ -122,8 +144,10 @@ class Details extends Component {
           key={index}
           name={item.name}
           price={item.price}
+          ID={item.id}
           type={item.type}
           handleTotal={that.handleTotalHandler}
+          handlePop={that.handlePopHere}
         />
       );
     });

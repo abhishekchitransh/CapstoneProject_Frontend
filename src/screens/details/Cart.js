@@ -40,11 +40,14 @@ class Cart extends Component {
       }
     }
     
-      subtract() {
+      subtract(event) {
         if(this.state.qty>1){
         this.setState({
           qty: this.state.qty - 1
         });
+        if(this.state.qty===1){
+          this.props.handlePop(event.target.id);
+        }
         this.props.handleTotal(-this.props.price, this.props.name, this.state.qty);
       }
     } 
@@ -72,13 +75,13 @@ class Cart extends Component {
                         </Grid> 
                         <Grid item xs style={{margin:-10}}>
 
-                        <IconButton onClick={this.add}> 
-                             <Add />
-                        </IconButton>
+                        <button type='button' onClick={this.add} className='addSub'> 
+                             +
+                        </button>
                         {this.state.qty}
-                          <IconButton onClick={this.subtract}>
-                             <Remove/>
-                          </IconButton>
+                          <button type='button' id={this.props.ID} onClick={this.subtract} className='addSub'>
+                             -
+                          </button>
                         </Grid>
                         <Grid style={{marginLeft:8}} item xs={4}>      
                             <span>&#8377;</span>{this.props.price}
