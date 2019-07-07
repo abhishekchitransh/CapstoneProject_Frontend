@@ -1,21 +1,9 @@
 import React , {Component} from 'react';
-import Card from '@material-ui/core/Card';
-import Badge from '@material-ui/core/Badge';
-import CardHeader from '@material-ui/core/CardHeader';
-import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
-import CardActions from '@material-ui/core/CardActions';
-import Collapse from '@material-ui/core/Collapse';
-import Avatar from '@material-ui/core/Avatar';
-import IconButton from '@material-ui/core/IconButton';
-import ShoppingCart from '@material-ui/icons/ShoppingCart';
-import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
-import Add from '@material-ui/icons/Add';
-import Remove from '@material-ui/icons/Remove';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import FiberManualRecord from '@material-ui/icons/FiberManualRecord';
-
+import './Cart.css';
 
 class Cart extends Component {
 
@@ -42,15 +30,15 @@ class Cart extends Component {
     
       subtract(event) {
         if(this.state.qty>1){
-        this.setState({
-          qty: this.state.qty - 1
-        });
-        if(this.state.qty===1){
-          this.props.handlePop(event.target.id);
-        }
+          this.setState({
+            qty: this.state.qty - 1
+          });
+          }
+          if(this.state.qty===1){
+            this.props.handlePop(event.target.id);
+          }
         this.props.handleTotal(-this.props.price, this.props.name, this.state.qty);
       }
-    } 
 
 
     render(){

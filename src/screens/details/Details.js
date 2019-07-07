@@ -158,6 +158,7 @@ class Details extends Component {
     return (
    
       <div>
+         <Grid item xs={12}>
         <div className="up-container">
           <div className='img-container'>
             <img className={classes.image} src={this.state.restaurantData.photo_URL}></img>
@@ -174,21 +175,24 @@ class Details extends Component {
           </div>
               <div className='avg-rating-price'>
                 <div className='avg-rating'>
-                  <div>
+                  <div className='resrating'>
                     <Grade/>
                     <span className='rating'>{this.state.restaurantData.customer_rating}</span>
                   </div>
-                  <div>AVERAGE RATING BY {this.state.restaurantData.number_customers_rated} CUSTOMERS</div>
+                  <div className='ratingComment'><span className="ratingText">AVERAGE RATING BY {this.state.restaurantData.number_customers_rated} CUSTOMERS</span></div>
                 </div>
                 <div className='avg-price'>
                 <div>
-                  <span>&#8377; {this.state.restaurantData.average_price}</span>
+                  <span className='avg-prices'>&#8377; {this.state.restaurantData.average_price}</span>
                 </div>
-                <div>AVERAGE COST FOR TWO PEOPLE</div>
+                <div className='avg-prices'><span className="ratingText">AVERAGE COST FOR TWO PEOPLE</span>
                 </div>
               </div>
             </div>
           </div>
+          </div>
+          </Grid>
+        <br></br><br></br>
         <div className="flex-container">
           <div className="left-container">
             <Grid item xs={12}>
@@ -230,7 +234,6 @@ class Details extends Component {
                     }
                     title={<h2>My cart</h2>}
                   />
-                  {this.state.data.length === 0 && <span>Cart is empty</span>}
                   {items}
                   <CardContent>
                     <Grid container spacing={3}>
